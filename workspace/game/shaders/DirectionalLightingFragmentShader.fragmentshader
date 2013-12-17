@@ -1,0 +1,45 @@
+#version 150 core
+
+uniform sampler2D Texture_color;
+
+uniform vec3 Ambient_Light;
+uniform vec3 Light_color;
+uniform vec3 Light_direction;
+uniform vec3 HalfVector;
+uniform float Shininess;
+uniform float Strength;
+
+in vec2 fTextureCoords;
+in vec3 fNormal;
+
+out vec4 FragColor;
+
+void main(void) 
+{
+	// Get the Color from the texture
+	
+	vec4 Color = texture(Texture_color, fTextureCoords.xy);
+	
+	// compute cosine of the directions, using dot products,
+	// to see how much light would be reflected
+	
+	float diffuse = max(0.0, dot(fNormal, Light_direction));
+	float specular = max(0.0, dot(fNormal, HalfVector));
+	
+	// surfaces facing away from the light (negative dot products)
+	// wont be lit by the directional light
+	
+	if (diffuse == 0.0)
+		specular = 0.0;
+	else
+		specular = pow(specular, Shininess);	// sharpen the highlight
+		
+	vec3 scatteredLight = Ambient_Light + Light_color * diffuse;
+	vec3 reflectedLight = Light_color * specular * Strength;
+	
+	// dont modulate the underlying color with reflected light
+	// only with scattered light
+	
+	vec3 rgb = min(Color.rgb * scatteredLight + reflectedLight, vec3(1.0));
+	FragColor = vec4(rgb,Color.a);
+}

@@ -1,0 +1,15 @@
+#version 150 core
+
+in vec2 UV;
+
+uniform sampler2D texture_color;
+uniform vec4 ambient_Light;
+
+out vec4 FragColor;
+
+void main(void) 
+{
+	vec4 color = texture(texture_color, UV.xy);
+	vec4 scatteredLight = ambient_Light; 
+	FragColor = min (color * scatteredLight,vec4(1.0));
+}
